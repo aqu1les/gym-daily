@@ -227,10 +227,10 @@ function onAbort(): void {
 
     <div class="fixed bottom-0 inset-x-0 z-30">
       <RestTimer
-        :remaining="timer.remaining.value"
-        :total="timer.total.value"
-        :is-running="timer.isRunning.value"
-        :progress="timer.progress.value"
+        :remaining="timer.remaining"
+        :total="timer.total"
+        :is-running="timer.isRunning"
+        :progress="timer.progress"
         @add="timer.add"
         @skip="timer.skip"
       />
