@@ -12,3 +12,9 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 - **`lastSetFor` faz match por `setNumber` exato**: pré-preenche o peso só se a série N da sessão anterior tiver sido feita. Alternativa mais permissiva: pegar qualquer série feita do exercício (boa quando a primeira série é aquecimento com peso diferente). Trocável depois.
 - **Reordenação por swap de vizinhos**: `moveRoutine`/`moveExercise` trocam `order` de dois itens em vez de recompactar todos. Suficiente pros botões ↑↓; quando entrar drag-and-drop (Fase 13) provavelmente vamos recompactar.
 - **`useHistory.lastSetFor` escaneia 20 sessões**: limite arbitrário pra evitar varrer o histórico inteiro. Se alguém pular um exercício por >20 treinos seguidos o pré-preenchimento some. Aceitável.
+
+## Fase 4 — Home
+
+- **`confirm()` nativo no delete**: rápido e ok no MVP, mas quebra a estética. Substituível por `AlertDialog` do shadcn-vue depois.
+- **Botão Play visível em todas as rotinas**: inicia sessão mesmo se a rotina não tiver exercícios. Talvez bloquear quando `exerciseCount === 0`. Decidir quando WorkoutSession existir (Fase 6).
+- **`tsConfigPath` removido de components.json**: rejeitado pelo schema do shadcn-vue CLI atual. Sem efeito prático (resolve via tsconfig padrão).
