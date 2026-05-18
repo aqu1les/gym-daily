@@ -1,5 +1,6 @@
 import { computed, ref, type Ref, type ComputedRef } from 'vue';
-import { useIntervalFn, useVibrate } from '@vueuse/core';
+import { useIntervalFn } from '@vueuse/core';
+import { useWebHaptics } from 'web-haptics/vue';
 
 export interface UseRestTimer {
   remaining: Ref<number>;
@@ -46,7 +47,7 @@ export function useRestTimer(): UseRestTimer {
   const remaining = ref(0);
   const total = ref(0);
   const isRunning = ref(false);
-  const { vibrate } = useVibrate({ pattern: [200, 100, 200], interval: 0 });
+  const { trigger: triggerHaptic } = useWebHaptics();
 
   const progress = computed(() => {
     if (total.value === 0) return 0;
@@ -59,7 +60,7 @@ export function useRestTimer(): UseRestTimer {
         remaining.value = 0;
         isRunning.value = false;
         interval.pause();
-        vibrate();
+        triggerHaptic('success');
         playBeep();
         return;
       }
