@@ -184,7 +184,7 @@ function onAbort(): void {
     <section v-if="currentExercise" class="space-y-2 flex-1">
       <div
         class="grid gap-2 items-center text-xs text-muted-foreground px-1"
-        :class="currentExercise.isCombo ? 'grid-cols-[2rem_1fr_1fr_3rem]' : 'grid-cols-[2rem_1fr_3rem]'"
+        :class="currentExercise.isCombo ? 'grid-cols-[2rem_1fr_1fr_2.5rem]' : 'grid-cols-[2rem_1fr_2.5rem]'"
       >
         <span>#</span>
         <span>{{ currentExercise.isCombo ? 'Peso A (kg)' : 'Peso (kg)' }}</span>
@@ -195,7 +195,7 @@ function onAbort(): void {
         v-for="entry in currentEntries"
         :key="entry.setNumber"
         class="grid gap-2 items-center"
-        :class="currentExercise.isCombo ? 'grid-cols-[2rem_1fr_1fr_3rem]' : 'grid-cols-[2rem_1fr_3rem]'"
+        :class="currentExercise.isCombo ? 'grid-cols-[2rem_1fr_1fr_2.5rem]' : 'grid-cols-[2rem_1fr_2.5rem]'"
       >
         <span class="text-sm tabular-nums text-muted-foreground">{{ entry.setNumber }}</span>
         <Input
@@ -219,13 +219,15 @@ function onAbort(): void {
         />
         <button
           type="button"
-          class="h-9 w-12 rounded-md border border-border flex items-center justify-center transition-colors"
-          :class="entry.done ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-accent'"
+          class="size-10 justify-self-center rounded-full border-2 flex items-center justify-center transition-all active:scale-90"
+          :class="entry.done
+            ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+            : 'bg-transparent border-border text-transparent hover:border-primary/60'"
           :aria-pressed="entry.done"
           :aria-label="`Marcar série ${entry.setNumber} como ${entry.done ? 'não feita' : 'feita'}`"
           @click="onToggle(entry.setNumber)"
         >
-          <Check v-if="entry.done" class="size-4" />
+          <Check class="size-5" :stroke-width="3" />
         </button>
       </div>
     </section>
