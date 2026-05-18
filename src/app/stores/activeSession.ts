@@ -210,7 +210,6 @@ export const useActiveSession = defineStore(
   {
     persist: {
       key: 'gymdaily-active-session',
-      storage: typeof window === 'undefined' ? undefined : localStorage,
       pick: [
         'sessionId',
         'routineId',
