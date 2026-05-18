@@ -1,17 +1,21 @@
 ---
-
+import App from '@/app/App.vue';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#09090b" />
+    <meta name="generator" content={Astro.generator} />
+    <title>GymDaily</title>
+  </head>
+  <body class="bg-background text-foreground">
+    <App client:only="vue" />
+  </body>
 </html>
+
+<style is:global>
+  html, body { margin: 0; padding: 0; }
+</style>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#09090b"/>
+  <g fill="#3b82f6">
+    <rect x="100" y="220" width="36" height="72" rx="8"/>
+    <rect x="376" y="220" width="36" height="72" rx="8"/>
+    <rect x="148" y="190" width="28" height="132" rx="8"/>
+    <rect x="336" y="190" width="28" height="132" rx="8"/>
+    <rect x="180" y="240" width="152" height="32" rx="8"/>
+  </g>
+  <text x="256" y="424" text-anchor="middle" fill="#fafafa" font-family="system-ui,sans-serif" font-size="64" font-weight="700">GD</text>
+</svg>
