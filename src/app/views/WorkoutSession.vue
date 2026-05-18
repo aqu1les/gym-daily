@@ -27,7 +27,16 @@ const {
   totalSets,
 } = storeToRefs(session);
 
-const timer = useRestTimer();
+const {
+  remaining: timerRemaining,
+  total: timerTotal,
+  isRunning: timerRunning,
+  progress: timerProgress,
+  start: startTimer,
+  add: addTimer,
+  skip: skipTimer,
+  reset: resetTimer,
+} = useRestTimer();
 const { trigger: triggerHaptic } = useWebHaptics();
 const { isSupported: wakeLockSupported, request: requestWakeLock, release: releaseWakeLock } =
   useWakeLock();
@@ -58,7 +67,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   void releaseWakeLock();
-  timer.reset();
+  resetTimer();
 });
 
 const progressPct = computed(() => {
@@ -83,7 +92,7 @@ function onToggle(setNumber: number): void {
   const nowDone = session.toggleDone(ex.id, setNumber);
   if (nowDone) {
     triggerHaptic('nudge');
-    if (ex.restSeconds > 0) timer.start(ex.restSeconds);
+    if (ex.restSeconds > 0) startTimer(ex.restSeconds);
   }
 }
 
@@ -236,12 +245,12 @@ function onAbort(): void {
 
     <div class="fixed bottom-0 inset-x-0 z-30 pb-[env(safe-area-inset-bottom)]">
       <RestTimer
-        :remaining="timer.remaining"
-        :total="timer.total"
-        :is-running="timer.isRunning"
-        :progress="timer.progress"
-        @add="timer.add"
-        @skip="timer.skip"
+        :remaining="timerRemaining"
+        :total="timerTotal"
+        :is-running="timerRunning"
+        :progress="timerProgress"
+        @add="addTimer"
+        @skip="skipTimer"
       />
       <div class="border-t border-border bg-background/95 backdrop-blur">
         <div class="max-w-md mx-auto px-4 py-2 grid grid-cols-2 gap-2">
