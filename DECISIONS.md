@@ -23,3 +23,10 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 
 - **Sem validação de reps**: aceita qualquer string ("8-12", "AMRAP", "10"). Decisão consciente porque a spec permite ambos. Se quiser estruturar (min/max numéricos), refatorar `reps` no schema.
 - **Alternativas só por texto livre**: não há sugestão/autocompletar do banco de exercícios existentes. Útil seria sugerir nomes já usados em outras rotinas.
+
+## Fase 6 — WorkoutSession
+
+- **Input de peso desabilita quando série marcada como feita**: previne edição acidental. Tradeoff: pra corrigir, precisa desmarcar primeiro. Alternativa: deixar editável sempre e só travar o `done` timestamp.
+- **Sem campo de reps por série**: spec define `reps` como prescrição (string "8-12"), e `SetEntry.reps` é opcional. No MVP só registra peso + feito. Se quiser registrar reps reais por série, adicionar input numérico no grid.
+- **Trocar rotina abandona sessão ativa sem confirmação extra**: ao navegar pra outra `/session/:routineId`, a sessão antiga é resetada silenciosamente. Cenário raro mas pode surpreender. Adicionar guard se virar problema.
+- **Auto-start ao entrar na rota**: se você atualiza a página no meio do treino e a Fase 9 (persistência) ainda não estiver pronta, perde tudo. Aceitável até Fase 9.

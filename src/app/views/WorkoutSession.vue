@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import { useWakeLock } from '@vueuse/core';
 import { ChevronLeft, ChevronRight, Check, X } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
+import RestTimer from '@/app/components/RestTimer.vue';
 import { useActiveSession } from '@/app/stores/activeSession';
+import { useRestTimer } from '@/app/composables/useRestTimer';
 import { toast } from 'vue-sonner';
 
 const props = defineProps<{ routineId: string }>();
@@ -15,6 +18,10 @@ const session = useActiveSession();
 const { currentExercise, currentEntries, currentIndex, orderedExercises, doneSets, totalSets } =
   storeToRefs(session);
 
+const timer = useRestTimer();
+const { isSupported: wakeLockSupported, request: requestWakeLock, release: releaseWakeLock } =
+  useWakeLock();
+
 onMounted(async () => {
   const needsStart =
     !session.isActive || session.routineId !== props.routineId;
@@ -23,8 +30,21 @@ onMounted(async () => {
     const ok = await session.start(props.routineId);
     if (!ok) {
       router.replace({ name: 'home' });
+      return;
     }
   }
+  if (wakeLockSupported.value) {
+    try {
+      await requestWakeLock('screen');
+    } catch (err) {
+      console.warn('wake lock failed', err);
+    }
+  }
+});
+
+onBeforeUnmount(() => {
+  void releaseWakeLock();
+  timer.reset();
 });
 
 const progressPct = computed(() => {
@@ -40,7 +60,10 @@ const isFirst = computed(() => currentIndex.value === 0);
 function onToggle(setNumber: number): void {
   const ex = currentExercise.value;
   if (!ex) return;
-  session.toggleDone(ex.id, setNumber);
+  const nowDone = session.toggleDone(ex.id, setNumber);
+  if (nowDone && ex.restSeconds > 0) {
+    timer.start(ex.restSeconds);
+  }
 }
 
 function onWeightInput(setNumber: number, value: string): void {
@@ -129,17 +152,27 @@ function onAbort(): void {
       </div>
     </section>
 
-    <footer class="fixed bottom-0 inset-x-0 border-t border-border bg-background/95 backdrop-blur">
-      <div class="max-w-md mx-auto px-4 py-2 grid grid-cols-2 gap-2">
-        <Button variant="secondary" :disabled="isFirst" @click="session.prev()">
-          <ChevronLeft class="size-4" />
-          Anterior
-        </Button>
-        <Button :disabled="isLast" @click="session.next()">
-          Próximo
-          <ChevronRight class="size-4" />
-        </Button>
+    <div class="fixed bottom-0 inset-x-0 z-30">
+      <RestTimer
+        :remaining="timer.remaining.value"
+        :total="timer.total.value"
+        :is-running="timer.isRunning.value"
+        :progress="timer.progress.value"
+        @add="timer.add"
+        @skip="timer.skip"
+      />
+      <div class="border-t border-border bg-background/95 backdrop-blur">
+        <div class="max-w-md mx-auto px-4 py-2 grid grid-cols-2 gap-2">
+          <Button variant="secondary" :disabled="isFirst" @click="session.prev()">
+            <ChevronLeft class="size-4" />
+            Anterior
+          </Button>
+          <Button :disabled="isLast" @click="session.next()">
+            Próximo
+            <ChevronRight class="size-4" />
+          </Button>
+        </div>
       </div>
-    </footer>
+    </div>
   </div>
 </template>
