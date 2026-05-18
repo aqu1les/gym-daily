@@ -49,3 +49,17 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 - **Sessão guarda só `exerciseId`, não snapshot do exercício**: se você editar/renomear/excluir o exercício depois, o histórico mostra o estado atual (ou "Exercício excluído"). Tradeoff: economia de espaço vs. imutabilidade histórica. Aceito por enquanto.
 - **Sem filtros**: lista plana cronológica reversa. Quando o histórico crescer, vamos querer filtrar por rotina/intervalo.
 - **Sem estatísticas (volume, PRs)**: spec não pede; Fase 13 (polimento) ou pós-MVP.
+
+## Fase 12 — Export/Import
+
+- **Import recarrega a página inteira**: jeito mais seguro de resetar todos os `liveQuery` que estavam apontando pro DB antigo. Alternativa: re-emitir as queries manualmente, mas é frágil. Custo: ~1s de flash.
+- **Sem merge no import**: é sempre "wipe + restaurar". Útil pra backup/restore puro; ruim se você quiser combinar dois devices. Aceito por enquanto.
+- **Backup expõe IDs UUID**: trivial de inspecionar mas sem dados sensíveis no esquema atual.
+
+## Fase 13 — Polimento (pulada no MVP)
+
+Não implementadas, ficam como backlog:
+
+- **Drag-and-drop** (`vue-draggable-plus`) para reordenar rotinas/exercícios. Botões ↑↓ continuam funcionando.
+- **Transições entre exercícios** (slide ao navegar prev/next na sessão).
+- **Tema escuro automático** (`prefers-color-scheme`): hoje o `App.vue` força `.dark` no mount. Pra respeitar o SO, basta remover essa linha — os tokens já têm light mode definidos no `:root`.
