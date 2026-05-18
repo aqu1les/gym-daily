@@ -14,8 +14,10 @@ import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { Switch } from '@/app/components/ui/switch';
 import { Separator } from '@/app/components/ui/separator';
+import AutocompleteInput from '@/app/components/AutocompleteInput.vue';
 import type { Exercise } from '@/app/db/schema';
 import type { ExerciseDraft } from '@/app/composables/useExercises';
+import { useExerciseNames } from '@/app/composables/useExerciseNames';
 import { toast } from 'vue-sonner';
 
 const props = defineProps<{
@@ -28,6 +30,7 @@ const emit = defineEmits<{
   save: [draft: ExerciseDraft];
 }>();
 
+const allNames = useExerciseNames();
 const name = ref('');
 const sets = ref(3);
 const reps = ref('8-12');
@@ -115,7 +118,12 @@ function submit(): void {
       <form @submit.prevent="submit" class="flex-1 overflow-y-auto px-4 py-2 space-y-4">
         <div class="space-y-1.5">
           <Label for="ex-name">Nome</Label>
-          <Input id="ex-name" v-model="name" placeholder="Supino reto" autocomplete="off" />
+          <AutocompleteInput
+            id="ex-name"
+            v-model="name"
+            placeholder="Supino reto"
+            :suggestions="allNames"
+          />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -154,12 +162,15 @@ function submit(): void {
         <div class="space-y-2">
           <Label for="ex-alt">Alternativas</Label>
           <div class="flex gap-2">
-            <Input
+            <AutocompleteInput
               id="ex-alt"
               v-model="altInput"
               placeholder="Crucifixo, peck deck..."
-              autocomplete="off"
-              @keydown="onAltKeydown"
+              class="flex-1"
+              :suggestions="allNames"
+              :exclude="[name, ...alternatives]"
+              @pick="(v) => { altInput = v; addAlternative(); }"
+              @submit="addAlternative"
             />
             <Button type="button" size="icon" variant="secondary" @click="addAlternative" aria-label="Adicionar alternativa">
               <Plus class="size-4" />
