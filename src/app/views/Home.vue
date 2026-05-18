@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { Plus, MoreVertical, ChevronUp, ChevronDown, Play, X } from 'lucide-vue-next';
+import {
+  Plus,
+  MoreVertical,
+  ChevronUp,
+  ChevronDown,
+  Play,
+  X,
+  Share2,
+  ClipboardPaste,
+} from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
@@ -25,6 +34,12 @@ import { useActiveSession } from '@/app/stores/activeSession';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { toast } from 'vue-sonner';
+import {
+  exportRoutineCode,
+  decodeRoutineCode,
+  importRoutineFromPreview,
+  type ImportPreview,
+} from '@/app/lib/share';
 
 const router = useRouter();
 const {
@@ -111,6 +126,73 @@ function openSession(id: string): void {
 function openEditor(id: string): void {
   router.push({ name: 'routine', params: { id } });
 }
+
+async function onShare(id: string): Promise<void> {
+  try {
+    const code = await exportRoutineCode(id);
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(code);
+      toast.success('Código copiado para a área de transferência');
+    } else {
+      importCodeInput.value = code;
+      importDialogOpen.value = true;
+      toast.info('Copie o código abaixo manualmente');
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error('Erro ao gerar código');
+  }
+}
+
+const importDialogOpen = ref(false);
+const importCodeInput = ref('');
+const importPreview = ref<ImportPreview | null>(null);
+const importError = ref<string | null>(null);
+
+function openImport(): void {
+  importCodeInput.value = '';
+  importPreview.value = null;
+  importError.value = null;
+  importDialogOpen.value = true;
+}
+
+async function pasteFromClipboard(): Promise<void> {
+  try {
+    if (!navigator.clipboard?.readText) {
+      toast.error('Cole o código manualmente');
+      return;
+    }
+    const text = await navigator.clipboard.readText();
+    importCodeInput.value = text;
+    parseImport();
+  } catch {
+    toast.error('Permissão negada — cole manualmente');
+  }
+}
+
+function parseImport(): void {
+  importError.value = null;
+  importPreview.value = null;
+  const code = importCodeInput.value.trim();
+  if (!code) return;
+  try {
+    importPreview.value = decodeRoutineCode(code);
+  } catch (err) {
+    importError.value = err instanceof Error ? err.message : 'Código inválido';
+  }
+}
+
+async function confirmImport(): Promise<void> {
+  if (!importPreview.value) return;
+  try {
+    await importRoutineFromPreview(importPreview.value);
+    toast.success(`Rotina "${importPreview.value.name}" importada`);
+    importDialogOpen.value = false;
+  } catch (err) {
+    console.error(err);
+    toast.error('Erro ao importar');
+  }
+}
 </script>
 
 <template>
@@ -120,9 +202,23 @@ function openEditor(id: string): void {
         <h1 class="text-2xl font-semibold">GymDaily</h1>
         <p class="text-sm text-muted-foreground">Suas rotinas de treino</p>
       </div>
-      <Button size="icon" @click="openCreate" aria-label="Nova rotina">
-        <Plus class="size-5" />
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button size="icon" aria-label="Nova rotina ou importar">
+            <Plus class="size-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem @select="openCreate">
+            <Plus class="size-4" />
+            Nova rotina
+          </DropdownMenuItem>
+          <DropdownMenuItem @select="openImport">
+            <ClipboardPaste class="size-4" />
+            Importar código
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
 
     <button
@@ -197,6 +293,10 @@ function openEditor(id: string): void {
             <DropdownMenuItem @select="onDuplicate(routine.id)">
               Duplicar
             </DropdownMenuItem>
+            <DropdownMenuItem @select="onShare(routine.id)">
+              <Share2 class="size-4" />
+              Compartilhar
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="text-destructive" @select="onDelete(routine.id, routine.name)">
               Excluir
@@ -205,6 +305,52 @@ function openEditor(id: string): void {
         </DropdownMenu>
       </li>
     </ul>
+
+    <Dialog v-model:open="importDialogOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Importar rotina</DialogTitle>
+          <DialogDescription>
+            Cole o código gerado por outro celular. Uma nova rotina será criada (não sobrescreve nada).
+          </DialogDescription>
+        </DialogHeader>
+        <div class="space-y-3">
+          <div class="space-y-1.5">
+            <Label for="import-code">Código</Label>
+            <textarea
+              id="import-code"
+              v-model="importCodeInput"
+              rows="4"
+              placeholder="gd1:..."
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono break-all resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              @input="parseImport"
+            />
+            <Button type="button" variant="ghost" size="sm" @click="pasteFromClipboard">
+              <ClipboardPaste class="size-4" />
+              Colar do clipboard
+            </Button>
+          </div>
+          <div
+            v-if="importPreview"
+            class="rounded-md border border-border bg-card p-3 text-sm"
+          >
+            <div class="font-medium">{{ importPreview.name }}</div>
+            <div class="text-xs text-muted-foreground">
+              {{ importPreview.exerciseCount }} exercício{{ importPreview.exerciseCount === 1 ? '' : 's' }}
+            </div>
+          </div>
+          <p v-if="importError" class="text-xs text-destructive">{{ importError }}</p>
+          <DialogFooter>
+            <Button type="button" variant="ghost" @click="importDialogOpen = false">Cancelar</Button>
+            <Button type="button" :disabled="!importPreview" @click="confirmImport">
+              Importar
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
 
     <Dialog v-model:open="dialogOpen">
       <DialogContent>
