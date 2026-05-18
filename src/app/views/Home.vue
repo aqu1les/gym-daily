@@ -102,25 +102,25 @@ async function submitDialog(): Promise<void> {
   if (dialogMode.value === 'create') {
     const id = await createRoutine(name);
     if (id) {
-      toast.success('Rotina criada');
+      toast.success('Treino criado');
       dialogOpen.value = false;
     }
   } else {
     await renameRoutine(dialogMode.value.id, name);
-    toast.success('Rotina renomeada');
+    toast.success('Treino renomeado');
     dialogOpen.value = false;
   }
 }
 
 async function onDuplicate(id: string): Promise<void> {
   const newId = await duplicateRoutine(id);
-  if (newId) toast.success('Rotina duplicada');
+  if (newId) toast.success('Treino duplicado');
 }
 
 async function onDelete(id: string, name: string): Promise<void> {
-  if (!confirm(`Excluir a rotina "${name}"? Todos os exercícios serão removidos.`)) return;
+  if (!confirm(`Excluir o treino "${name}"? Todos os exercícios serão removidos.`)) return;
   await deleteRoutine(id);
-  toast.success('Rotina excluída');
+  toast.success('Treino excluído');
 }
 
 function openSession(id: string): void {
@@ -190,7 +190,7 @@ async function confirmImport(): Promise<void> {
   if (!importPreview.value) return;
   try {
     await importRoutineFromPreview(importPreview.value);
-    toast.success(`Rotina "${importPreview.value.name}" importada`);
+    toast.success(`Treino "${importPreview.value.name}" importado`);
     importDialogOpen.value = false;
   } catch (err) {
     console.error(err);
@@ -204,18 +204,18 @@ async function confirmImport(): Promise<void> {
     <header class="mb-6 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-semibold">GymDaily</h1>
-        <p class="text-sm text-muted-foreground">Suas rotinas de treino</p>
+        <p class="text-sm text-muted-foreground">Seus treinos</p>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button size="icon" aria-label="Nova rotina ou importar">
+          <Button size="icon" aria-label="Novo treino ou importar">
             <Plus class="size-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem @select="openCreate">
             <Plus class="size-4" />
-            Nova rotina
+            Novo treino
           </DropdownMenuItem>
           <DropdownMenuItem @select="openImport">
             <ClipboardPaste class="size-4" />
@@ -252,10 +252,10 @@ async function confirmImport(): Promise<void> {
       v-if="routines.length === 0"
       class="rounded-lg border border-dashed border-border p-8 text-center"
     >
-      <p class="text-sm text-muted-foreground mb-4">Nenhuma rotina ainda.</p>
+      <p class="text-sm text-muted-foreground mb-4">Nenhum treino ainda.</p>
       <Button variant="secondary" @click="openCreate">
         <Plus class="size-4" />
-        Criar primeira rotina
+        Criar primeiro treino
       </Button>
     </div>
 
@@ -322,9 +322,9 @@ async function confirmImport(): Promise<void> {
     <Dialog v-model:open="importDialogOpen">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Importar rotina</DialogTitle>
+          <DialogTitle>Importar treino</DialogTitle>
           <DialogDescription>
-            Cole o código gerado por outro celular. Uma nova rotina será criada (não sobrescreve nada).
+            Cole o código gerado por outro celular. Um novo treino será criado (não sobrescreve nada).
           </DialogDescription>
         </DialogHeader>
         <div class="space-y-3">
@@ -369,10 +369,10 @@ async function confirmImport(): Promise<void> {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {{ dialogMode === 'create' ? 'Nova rotina' : 'Renomear rotina' }}
+            {{ dialogMode === 'create' ? 'Novo treino' : 'Renomear treino' }}
           </DialogTitle>
           <DialogDescription>
-            {{ dialogMode === 'create' ? 'Dê um nome para sua rotina (ex: Treino A, PPL Push).' : 'Atualize o nome da rotina.' }}
+            {{ dialogMode === 'create' ? 'Dê um nome para o treino (ex: Treino A, PPL Push).' : 'Atualize o nome do treino.' }}
           </DialogDescription>
         </DialogHeader>
         <form @submit.prevent="submitDialog" class="space-y-3">

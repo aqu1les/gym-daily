@@ -38,7 +38,7 @@ function resetToOriginal(): void {
       <SheetHeader>
         <SheetTitle>Trocar exercício</SheetTitle>
         <SheetDescription>
-          A troca vale só para este treino. A rotina salva não é alterada.
+          A troca vale só para esta sessão. O treino salvo não é alterado.
         </SheetDescription>
       </SheetHeader>
 

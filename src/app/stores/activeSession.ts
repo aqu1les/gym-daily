@@ -56,7 +56,7 @@ export const useActiveSession = defineStore(
           .equals(targetRoutineId)
           .sortBy('order');
         if (list.length === 0) {
-          toast.error('Rotina sem exercícios');
+          toast.error('Treino sem exercícios');
           return false;
         }
 

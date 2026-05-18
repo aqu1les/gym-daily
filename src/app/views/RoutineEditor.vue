@@ -68,7 +68,7 @@ function startSession(): void {
   router.push({ name: 'session', params: { routineId: props.id } });
 }
 
-const title = computed(() => routine.value?.name ?? 'Rotina');
+const title = computed(() => routine.value?.name ?? 'Treino');
 </script>
 
 <template>

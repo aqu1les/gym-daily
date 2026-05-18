@@ -30,7 +30,7 @@ onMounted(() => {
           active-class="text-primary"
         >
           <HomeIcon class="size-5" />
-          Rotinas
+          Treinos
         </RouterLink>
         <RouterLink
           to="/history"

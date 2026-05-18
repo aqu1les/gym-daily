@@ -85,7 +85,7 @@ async function onDelete(id: string): Promise<void> {
               />
               <div class="flex-1 min-w-0">
                 <div class="font-medium truncate">
-                  {{ routineNameById[s.routineId] ?? 'Rotina excluída' }}
+                  {{ routineNameById[s.routineId] ?? 'Treino excluído' }}
                 </div>
                 <div class="text-xs text-muted-foreground">
                   {{ formatDate(s.startedAt) }} · {{ formatDuration(s.startedAt, s.finishedAt) }}

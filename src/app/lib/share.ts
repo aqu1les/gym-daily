@@ -31,7 +31,7 @@ function base64ToUtf8(b64: string): string {
 
 export async function exportRoutineCode(routineId: string): Promise<string> {
   const routine = await db.routines.get(routineId);
-  if (!routine) throw new Error('Rotina não encontrada');
+  if (!routine) throw new Error('Treino não encontrado');
   const exercises = await db.exercises
     .where('routineId')
     .equals(routineId)

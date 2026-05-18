@@ -35,7 +35,7 @@ async function onImport(event: Event): Promise<void> {
   if (!file) return;
 
   const proceed = confirm(
-    'Importar este backup vai SOBRESCREVER todos os dados atuais (rotinas, exercícios e histórico). Continuar?',
+    'Importar este backup vai SOBRESCREVER todos os dados atuais (treinos, exercícios e histórico). Continuar?',
   );
   if (!proceed) return;
 
@@ -64,7 +64,7 @@ async function onImport(event: Event): Promise<void> {
       <div>
         <h2 class="font-medium">Backup</h2>
         <p class="text-xs text-muted-foreground mt-0.5">
-          Exporta todas as rotinas, exercícios e sessões como um arquivo JSON.
+          Exporta todos os treinos, exercícios e sessões como um arquivo JSON.
         </p>
       </div>
       <Button class="w-full" :disabled="busy" @click="onExport">
