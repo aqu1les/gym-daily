@@ -44,6 +44,8 @@ onMounted(async () => {
       router.replace({ name: 'home' });
       return;
     }
+  } else {
+    await session.refreshExercises();
   }
   if (wakeLockSupported.value) {
     try {

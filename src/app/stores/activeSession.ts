@@ -174,6 +174,54 @@ export const useActiveSession = defineStore(
       }
     }
 
+    /**
+     * Re-read the exercises from the database for the current session and
+     * keep entries that still match (exerciseId + setNumber). New sets created
+     * by the user editing the routine get fresh entries; removed sets are
+     * dropped. Used when resuming a persisted session whose underlying
+     * exercises may have changed since start().
+     */
+    async function refreshExercises(): Promise<void> {
+      if (!routineId.value) return;
+      try {
+        const list = await db.exercises
+          .where('routineId')
+          .equals(routineId.value)
+          .sortBy('order');
+
+        const { lastSetFor } = useHistory();
+        const nextEntries: SetEntry[] = [];
+        for (const ex of list) {
+          for (let n = 1; n <= ex.sets; n++) {
+            const existing = entries.value.find(
+              (e) => e.exerciseId === ex.id && e.setNumber === n,
+            );
+            if (existing) {
+              nextEntries.push(existing);
+            } else {
+              const last = await lastSetFor(ex.id, n);
+              nextEntries.push({
+                exerciseId: ex.id,
+                setNumber: n,
+                weightKg: last?.weightKg ?? 0,
+                weightKgSecondary: last?.weightKgSecondary,
+                done: false,
+              });
+            }
+          }
+        }
+
+        exercises.value = list;
+        entries.value = nextEntries;
+        if (currentIndex.value >= list.length) {
+          currentIndex.value = Math.max(0, list.length - 1);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Erro ao atualizar exercícios');
+      }
+    }
+
     function hasStaleSession(maxAgeMs: number = 12 * 60 * 60 * 1000): boolean {
       if (!startedAt.value) return false;
       return Date.now() - startedAt.value > maxAgeMs;
@@ -204,6 +252,7 @@ export const useActiveSession = defineStore(
       clearSubstitution,
       reset,
       finish,
+      refreshExercises,
       hasStaleSession,
     };
   },
