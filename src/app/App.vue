@@ -2,7 +2,7 @@
 import { onMounted } from 'vue';
 import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { Toaster } from 'vue-sonner';
-import { Home as HomeIcon, History as HistoryIcon } from 'lucide-vue-next';
+import { Home as HomeIcon, History as HistoryIcon, Settings as SettingsIcon } from 'lucide-vue-next';
 
 const route = useRoute();
 
@@ -23,7 +23,7 @@ onMounted(() => {
       v-if="route.name !== 'session'"
       class="fixed bottom-0 inset-x-0 border-t border-border bg-background/95 backdrop-blur z-40"
     >
-      <div class="max-w-md mx-auto grid grid-cols-2 h-16">
+      <div class="max-w-md mx-auto grid grid-cols-3 h-16">
         <RouterLink
           to="/"
           class="flex flex-col items-center justify-center gap-1 text-xs"
@@ -39,6 +39,14 @@ onMounted(() => {
         >
           <HistoryIcon class="size-5" />
           Histórico
+        </RouterLink>
+        <RouterLink
+          to="/settings"
+          class="flex flex-col items-center justify-center gap-1 text-xs"
+          active-class="text-primary"
+        >
+          <SettingsIcon class="size-5" />
+          Ajustes
         </RouterLink>
       </div>
     </nav>

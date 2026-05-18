@@ -43,3 +43,9 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 - **Substituição é só display name**: `SetEntry.exerciseId` continua o original, então o histórico mostra o exercício prescrito (não o substituído). Se quiser registrar "fez X em vez de Y", precisamos adicionar `actualName?: string` em `SetEntry`. Tradeoff: mais info vs. mais ruído no histórico.
 - **Alternativas pegam sets/reps/rest do original**: como alternatives são strings (não Exercise records), o substituto herda o volume/descanso. Bom o suficiente quando a alt é equivalente (ex: supino reto ↔ supino inclinado); ruim se a alt tem outro padrão.
 - **Botão "Trocar" só aparece se há alternativas cadastradas ou substituição ativa**: evita poluir o card de exercício "puro". Se quiser sempre permitir trocar (mesmo digitando uma alt nova), precisamos adicionar input livre no sheet.
+
+## Fase 11 — Histórico
+
+- **Sessão guarda só `exerciseId`, não snapshot do exercício**: se você editar/renomear/excluir o exercício depois, o histórico mostra o estado atual (ou "Exercício excluído"). Tradeoff: economia de espaço vs. imutabilidade histórica. Aceito por enquanto.
+- **Sem filtros**: lista plana cronológica reversa. Quando o histórico crescer, vamos querer filtrar por rotina/intervalo.
+- **Sem estatísticas (volume, PRs)**: spec não pede; Fase 13 (polimento) ou pós-MVP.
