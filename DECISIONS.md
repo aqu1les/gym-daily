@@ -30,3 +30,10 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 - **Sem campo de reps por série**: spec define `reps` como prescrição (string "8-12"), e `SetEntry.reps` é opcional. No MVP só registra peso + feito. Se quiser registrar reps reais por série, adicionar input numérico no grid.
 - **Trocar rotina abandona sessão ativa sem confirmação extra**: ao navegar pra outra `/session/:routineId`, a sessão antiga é resetada silenciosamente. Cenário raro mas pode surpreender. Adicionar guard se virar problema.
 - **Auto-start ao entrar na rota**: se você atualiza a página no meio do treino e a Fase 9 (persistência) ainda não estiver pronta, perde tudo. Aceitável até Fase 9.
+
+## Fase 7 — RestTimer
+
+- **AudioContext criado a cada beep**: gera/fecha um contexto por vez. Mais simples que reaproveitar, e evita problema de contexto suspenso depois de muito tempo sem interação. Custo de ~1ms negligível, mas se notar latência podemos cachear.
+- **Beep não respeita "silencioso" do device em alguns browsers**: Web Audio toca mesmo no modo silencioso em desktop; iOS Safari respeita o switch físico. Aceitável — vibração é o sinal principal no mobile.
+- **Sem opção de "auto-start na primeira série"**: timer só dispara após marcar feito. Spec não pede botão "iniciar manual"; se você quiser começar o descanso antes de marcar (raro), precisaríamos adicionar.
+- **Wake lock não tem fallback**: em browsers sem suporte (Safari iOS antigo, Firefox em algumas plataformas), a tela desliga normalmente. Aceitável dado a Wake Lock API ser amplamente suportada agora.

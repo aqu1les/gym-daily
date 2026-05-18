@@ -23,18 +23,20 @@ export const useActiveSession = defineStore(
     const exercises = ref<Exercise[]>([]);
     const entries = ref<SetEntry[]>([]);
     const currentIndex = ref(0);
-    /** Exercise substitutions for this session only (originalId -> replacement Exercise). */
-    const substitutions = ref<Record<string, Exercise>>({});
+    /** Display-name substitutions for this session only (originalId -> alternative name). */
+    const substitutions = ref<Record<string, string>>({});
 
     const isActive = computed(() => sessionId.value !== null);
 
-    const orderedExercises = computed<Exercise[]>(() =>
-      exercises.value.map((ex) => substitutions.value[ex.id] ?? ex),
+    const currentExercise = computed<Exercise | null>(
+      () => exercises.value[currentIndex.value] ?? null,
     );
 
-    const currentExercise = computed<Exercise | null>(
-      () => orderedExercises.value[currentIndex.value] ?? null,
-    );
+    const currentDisplayName = computed<string>(() => {
+      const ex = currentExercise.value;
+      if (!ex) return '';
+      return substitutions.value[ex.id] ?? ex.name;
+    });
 
     const currentEntries = computed<SetEntry[]>(() => {
       const ex = currentExercise.value;
@@ -117,7 +119,7 @@ export const useActiveSession = defineStore(
     }
 
     function next(): void {
-      if (currentIndex.value < orderedExercises.value.length - 1) {
+      if (currentIndex.value < exercises.value.length - 1) {
         currentIndex.value++;
       }
     }
@@ -127,13 +129,13 @@ export const useActiveSession = defineStore(
     }
 
     function goTo(index: number): void {
-      if (index >= 0 && index < orderedExercises.value.length) {
+      if (index >= 0 && index < exercises.value.length) {
         currentIndex.value = index;
       }
     }
 
-    function substitute(originalId: string, replacement: Exercise): void {
-      substitutions.value[originalId] = replacement;
+    function substitute(originalId: string, alternativeName: string): void {
+      substitutions.value[originalId] = alternativeName;
     }
 
     function clearSubstitution(originalId: string): void {
@@ -181,8 +183,8 @@ export const useActiveSession = defineStore(
       currentIndex,
       substitutions,
       isActive,
-      orderedExercises,
       currentExercise,
+      currentDisplayName,
       currentEntries,
       totalSets,
       doneSets,
