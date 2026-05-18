@@ -136,7 +136,7 @@ function onAbort(): void {
 </script>
 
 <template>
-  <div class="max-w-md mx-auto px-4 pt-3 pb-24 flex flex-col min-h-dvh">
+  <div class="max-w-md mx-auto px-4 pt-3 pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col min-h-full">
     <header class="flex items-center gap-2 mb-3">
       <Button size="icon-sm" variant="ghost" @click="onAbort" aria-label="Descartar">
         <X class="size-4" />
@@ -234,7 +234,7 @@ function onAbort(): void {
       </div>
     </section>
 
-    <div class="fixed bottom-0 inset-x-0 z-30">
+    <div class="fixed bottom-0 inset-x-0 z-30 pb-[env(safe-area-inset-bottom)]">
       <RestTimer
         :remaining="timer.remaining"
         :total="timer.total"

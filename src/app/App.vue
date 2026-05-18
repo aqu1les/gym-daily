@@ -12,8 +12,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-dvh flex flex-col bg-background text-foreground">
-    <main class="flex-1 pb-20">
+  <div class="min-h-full flex flex-col bg-background text-foreground">
+    <main class="flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))]">
       <RouterView v-slot="{ Component }">
         <component :is="Component" />
       </RouterView>
@@ -21,7 +21,7 @@ onMounted(() => {
 
     <nav
       v-if="route.name !== 'session'"
-      class="fixed bottom-0 inset-x-0 border-t border-border bg-background/95 backdrop-blur z-40"
+      class="fixed bottom-0 inset-x-0 border-t border-border bg-background/95 backdrop-blur z-40 pb-[env(safe-area-inset-bottom)]"
     >
       <div class="max-w-md mx-auto grid grid-cols-3 h-16">
         <RouterLink
