@@ -324,7 +324,7 @@ async function confirmImport(): Promise<void> {
               placeholder="gd1:..."
               autocomplete="off"
               spellcheck="false"
-              class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm font-mono break-all resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-base md:text-sm font-mono break-all resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               @input="parseImport"
             />
             <Button type="button" variant="ghost" size="sm" @click="pasteFromClipboard">
