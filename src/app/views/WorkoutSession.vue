@@ -3,6 +3,7 @@ import { onMounted, onBeforeUnmount, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useWakeLock } from '@vueuse/core';
+import { useWebHaptics } from 'web-haptics/vue';
 import { ChevronLeft, ChevronRight, Check, X, Repeat } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -27,6 +28,7 @@ const {
 } = storeToRefs(session);
 
 const timer = useRestTimer();
+const { trigger: triggerHaptic } = useWebHaptics();
 const { isSupported: wakeLockSupported, request: requestWakeLock, release: releaseWakeLock } =
   useWakeLock();
 
@@ -77,8 +79,9 @@ function onToggle(setNumber: number): void {
   const ex = currentExercise.value;
   if (!ex) return;
   const nowDone = session.toggleDone(ex.id, setNumber);
-  if (nowDone && ex.restSeconds > 0) {
-    timer.start(ex.restSeconds);
+  if (nowDone) {
+    triggerHaptic('nudge');
+    if (ex.restSeconds > 0) timer.start(ex.restSeconds);
   }
 }
 
@@ -116,6 +119,7 @@ async function onFinish(): Promise<void> {
   }
   const ok = await session.finish();
   if (ok) {
+    triggerHaptic('success');
     toast.success('Treino salvo');
     router.replace({ name: 'home' });
   }
@@ -123,6 +127,7 @@ async function onFinish(): Promise<void> {
 
 function onAbort(): void {
   if (!confirm('Descartar este treino? Nada será salvo.')) return;
+  triggerHaptic('error');
   session.reset();
   router.replace({ name: 'home' });
 }

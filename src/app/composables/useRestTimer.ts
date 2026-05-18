@@ -101,6 +101,7 @@ export function useRestTimer(): UseRestTimer {
     const newRemaining = Math.ceil((newEnd - Date.now()) / 1000);
     remaining.value = newRemaining;
     total.value = Math.max(total.value, newRemaining);
+    triggerHaptic('nudge');
   }
 
   function skip(): void {
@@ -108,6 +109,7 @@ export function useRestTimer(): UseRestTimer {
     isRunning.value = false;
     endsAt.value = null;
     interval.pause();
+    triggerHaptic('nudge');
   }
 
   function reset(): void {
