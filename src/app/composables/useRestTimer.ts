@@ -1,5 +1,5 @@
 import { computed, ref, type Ref, type ComputedRef } from 'vue';
-import { useIntervalFn } from '@vueuse/core';
+import { useIntervalFn, useEventListener } from '@vueuse/core';
 import { useWebHaptics } from 'web-haptics/vue';
 
 export interface UseRestTimer {
@@ -47,6 +47,8 @@ export function useRestTimer(): UseRestTimer {
   const remaining = ref(0);
   const total = ref(0);
   const isRunning = ref(false);
+  /** Absolute end time in epoch ms. Source of truth — survives background throttling. */
+  const endsAt = ref<number | null>(null);
   const { trigger: triggerHaptic } = useWebHaptics();
 
   const progress = computed(() => {
@@ -54,39 +56,57 @@ export function useRestTimer(): UseRestTimer {
     return Math.max(0, Math.min(1, remaining.value / total.value));
   });
 
-  const interval = useIntervalFn(
-    () => {
-      if (remaining.value <= 1) {
-        remaining.value = 0;
-        isRunning.value = false;
-        interval.pause();
+  function syncFromClock(): void {
+    if (endsAt.value === null) return;
+    const msLeft = endsAt.value - Date.now();
+    if (msLeft <= 0) {
+      const wasRunning = isRunning.value;
+      remaining.value = 0;
+      isRunning.value = false;
+      endsAt.value = null;
+      interval.pause();
+      if (wasRunning) {
         triggerHaptic('success');
         playBeep();
-        return;
       }
-      remaining.value--;
+      return;
+    }
+    remaining.value = Math.ceil(msLeft / 1000);
+  }
+
+  const interval = useIntervalFn(syncFromClock, 1000, { immediate: false });
+
+  useEventListener(
+    typeof document !== 'undefined' ? document : null,
+    'visibilitychange',
+    () => {
+      if (document.visibilityState === 'visible') syncFromClock();
     },
-    1000,
-    { immediate: false },
   );
+  useEventListener(typeof window !== 'undefined' ? window : null, 'focus', syncFromClock);
 
   function start(seconds: number): void {
     if (seconds <= 0) return;
     total.value = seconds;
     remaining.value = seconds;
+    endsAt.value = Date.now() + seconds * 1000;
     isRunning.value = true;
     interval.resume();
   }
 
   function add(seconds: number): void {
-    if (!isRunning.value && remaining.value === 0) return;
-    remaining.value = Math.max(0, remaining.value + seconds);
-    total.value = Math.max(total.value, remaining.value);
+    if (endsAt.value === null) return;
+    const newEnd = Math.max(Date.now(), endsAt.value + seconds * 1000);
+    endsAt.value = newEnd;
+    const newRemaining = Math.ceil((newEnd - Date.now()) / 1000);
+    remaining.value = newRemaining;
+    total.value = Math.max(total.value, newRemaining);
   }
 
   function skip(): void {
     remaining.value = 0;
     isRunning.value = false;
+    endsAt.value = null;
     interval.pause();
   }
 
@@ -94,6 +114,7 @@ export function useRestTimer(): UseRestTimer {
     remaining.value = 0;
     total.value = 0;
     isRunning.value = false;
+    endsAt.value = null;
     interval.pause();
   }
 
