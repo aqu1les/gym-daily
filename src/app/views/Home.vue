@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
 import { useRoutines } from '@/app/composables/useRoutines';
+import { useNextRoutineId } from '@/app/composables/useNextRoutineId';
 import { useActiveSession } from '@/app/stores/activeSession';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
@@ -53,6 +54,9 @@ const {
 
 const session = useActiveSession();
 const { isActive, routineId: activeRoutineId, doneSets, totalSets } = storeToRefs(session);
+
+const nextRoutineId = useNextRoutineId(routines);
+const showSuggestion = computed(() => !isActive.value && nextRoutineId.value !== null);
 
 const activeRoutineName = computed(() => {
   const id = activeRoutineId.value;
@@ -259,14 +263,23 @@ async function confirmImport(): Promise<void> {
       <li
         v-for="(routine, idx) in routines"
         :key="routine.id"
-        class="flex items-center gap-2 rounded-lg border border-border bg-card p-3"
+        class="flex items-center gap-2 rounded-lg border p-3 transition-colors"
+        :class="showSuggestion && routine.id === nextRoutineId
+          ? 'border-primary bg-primary/5 ring-1 ring-primary/40'
+          : 'border-border bg-card'"
       >
         <button
           type="button"
-          class="flex-1 text-left"
+          class="flex-1 text-left min-w-0"
           @click="openEditor(routine.id)"
         >
-          <div class="font-medium">{{ routine.name }}</div>
+          <div class="font-medium truncate">{{ routine.name }}</div>
+          <div
+            v-if="showSuggestion && routine.id === nextRoutineId"
+            class="text-xs text-primary mt-0.5"
+          >
+            Próximo treino
+          </div>
         </button>
 
         <Button size="icon-sm" variant="ghost" :disabled="idx === 0" @click="moveRoutine(routine.id, 'up')" aria-label="Mover para cima">
