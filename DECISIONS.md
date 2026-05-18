@@ -16,5 +16,10 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 ## Fase 4 — Home
 
 - **`confirm()` nativo no delete**: rápido e ok no MVP, mas quebra a estética. Substituível por `AlertDialog` do shadcn-vue depois.
-- **Botão Play visível em todas as rotinas**: inicia sessão mesmo se a rotina não tiver exercícios. Talvez bloquear quando `exerciseCount === 0`. Decidir quando WorkoutSession existir (Fase 6).
+- **Botão Play visível em todas as rotinas**: na Home, inicia sessão mesmo se vazia (toast de erro aparece no RoutineEditor `startSession`, mas na Home ainda navega). Considerar desabilitar o Play da Home com `useLiveQuery` contando exercícios da rotina, ou redirecionar pro editor quando vazia.
 - **`tsConfigPath` removido de components.json**: rejeitado pelo schema do shadcn-vue CLI atual. Sem efeito prático (resolve via tsconfig padrão).
+
+## Fase 5 — RoutineEditor
+
+- **Sem validação de reps**: aceita qualquer string ("8-12", "AMRAP", "10"). Decisão consciente porque a spec permite ambos. Se quiser estruturar (min/max numéricos), refatorar `reps` no schema.
+- **Alternativas só por texto livre**: não há sugestão/autocompletar do banco de exercícios existentes. Útil seria sugerir nomes já usados em outras rotinas.
