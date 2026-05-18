@@ -83,4 +83,11 @@
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
   }
+
+  /* Stop iOS Safari from zooming on focus when an input's font-size is < 16px. */
+  @media (max-width: 767px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
+  }
 }
