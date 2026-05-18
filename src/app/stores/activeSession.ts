@@ -174,6 +174,11 @@ export const useActiveSession = defineStore(
       }
     }
 
+    function hasStaleSession(maxAgeMs: number = 12 * 60 * 60 * 1000): boolean {
+      if (!startedAt.value) return false;
+      return Date.now() - startedAt.value > maxAgeMs;
+    }
+
     return {
       sessionId,
       routineId,
@@ -199,6 +204,22 @@ export const useActiveSession = defineStore(
       clearSubstitution,
       reset,
       finish,
+      hasStaleSession,
     };
+  },
+  {
+    persist: {
+      key: 'gymdaily-active-session',
+      storage: typeof window === 'undefined' ? undefined : localStorage,
+      pick: [
+        'sessionId',
+        'routineId',
+        'startedAt',
+        'exercises',
+        'entries',
+        'currentIndex',
+        'substitutions',
+      ],
+    },
   },
 );

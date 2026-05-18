@@ -37,3 +37,9 @@ Coisas escolhidas durante a implementação que valem ser revistas no final do p
 - **Beep não respeita "silencioso" do device em alguns browsers**: Web Audio toca mesmo no modo silencioso em desktop; iOS Safari respeita o switch físico. Aceitável — vibração é o sinal principal no mobile.
 - **Sem opção de "auto-start na primeira série"**: timer só dispara após marcar feito. Spec não pede botão "iniciar manual"; se você quiser começar o descanso antes de marcar (raro), precisaríamos adicionar.
 - **Wake lock não tem fallback**: em browsers sem suporte (Safari iOS antigo, Firefox em algumas plataformas), a tela desliga normalmente. Aceitável dado a Wake Lock API ser amplamente suportada agora.
+
+## Fase 8 — Combo + Alternativas
+
+- **Substituição é só display name**: `SetEntry.exerciseId` continua o original, então o histórico mostra o exercício prescrito (não o substituído). Se quiser registrar "fez X em vez de Y", precisamos adicionar `actualName?: string` em `SetEntry`. Tradeoff: mais info vs. mais ruído no histórico.
+- **Alternativas pegam sets/reps/rest do original**: como alternatives são strings (não Exercise records), o substituto herda o volume/descanso. Bom o suficiente quando a alt é equivalente (ex: supino reto ↔ supino inclinado); ruim se a alt tem outro padrão.
+- **Botão "Trocar" só aparece se há alternativas cadastradas ou substituição ativa**: evita poluir o card de exercício "puro". Se quiser sempre permitir trocar (mesmo digitando uma alt nova), precisamos adicionar input livre no sheet.

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { Plus, MoreVertical, ChevronUp, ChevronDown, Play } from 'lucide-vue-next';
+import { Plus, MoreVertical, ChevronUp, ChevronDown, Play, X } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
@@ -21,6 +21,9 @@ import {
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
 import { useRoutines } from '@/app/composables/useRoutines';
+import { useActiveSession } from '@/app/stores/activeSession';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 
 const router = useRouter();
@@ -32,6 +35,26 @@ const {
   duplicateRoutine,
   moveRoutine,
 } = useRoutines();
+
+const session = useActiveSession();
+const { isActive, routineId: activeRoutineId, doneSets, totalSets } = storeToRefs(session);
+
+const activeRoutineName = computed(() => {
+  const id = activeRoutineId.value;
+  if (!id) return '';
+  return routines.value.find((r) => r.id === id)?.name ?? 'Treino em andamento';
+});
+
+function resumeSession(): void {
+  if (!activeRoutineId.value) return;
+  router.push({ name: 'session', params: { routineId: activeRoutineId.value } });
+}
+
+function discardSession(): void {
+  if (!confirm('Descartar treino em andamento? O progresso será perdido.')) return;
+  session.reset();
+  toast.success('Treino descartado');
+}
 
 type DialogMode = 'create' | { mode: 'rename'; id: string };
 
@@ -101,6 +124,29 @@ function openEditor(id: string): void {
         <Plus class="size-5" />
       </Button>
     </header>
+
+    <button
+      v-if="isActive"
+      type="button"
+      class="w-full mb-4 rounded-lg border border-primary/40 bg-primary/10 p-3 text-left flex items-center gap-3 hover:bg-primary/15 transition-colors"
+      @click="resumeSession"
+    >
+      <Play class="size-5 text-primary shrink-0" />
+      <div class="flex-1 min-w-0">
+        <div class="font-medium truncate">Continuar: {{ activeRoutineName }}</div>
+        <div class="text-xs text-muted-foreground">
+          {{ doneSets }} de {{ totalSets }} séries marcadas
+        </div>
+      </div>
+      <Button
+        size="icon-sm"
+        variant="ghost"
+        aria-label="Descartar treino em andamento"
+        @click.stop="discardSession"
+      >
+        <X class="size-4" />
+      </Button>
+    </button>
 
     <div
       v-if="routines.length === 0"
