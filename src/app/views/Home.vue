@@ -44,6 +44,7 @@ import {
   type ImportPreview,
 } from '@/app/lib/share';
 import { buildRoutineMarkdown } from '@/app/lib/markdown';
+import { isNativeShareDisabled } from '@/app/lib/devFlags';
 import ExportMarkdownDialog from '@/app/components/ExportMarkdownDialog.vue';
 
 const router = useRouter();
@@ -150,7 +151,7 @@ async function onShare(id: string): Promise<void> {
   }
 
   // 1. Share sheet nativo (WhatsApp, Telegram, etc.).
-  if (navigator.share) {
+  if (navigator.share && !isNativeShareDisabled()) {
     try {
       await navigator.share({ title: 'GymDaily — treino', url });
       return;

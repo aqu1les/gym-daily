@@ -3,11 +3,13 @@ import { defineConfig } from 'astro/config';
 import vue from '@astrojs/vue';
 import tailwindcss from '@tailwindcss/vite';
 import AstroPWA from '@vite-pwa/astro';
+import devToolbar from './dev/dev-toolbar';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
   integrations: [
+    devToolbar(),
     vue({ appEntrypoint: '/src/app/app-entrypoint.ts' }),
     AstroPWA({
       registerType: 'autoUpdate',
