@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import {
   Plus,
   MoreVertical,
@@ -37,7 +37,8 @@ import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 import {
-  exportRoutineCode,
+  buildShareUrl,
+  extractShareCode,
   decodeRoutineCode,
   importRoutineFromPreview,
   type ImportPreview,
@@ -46,6 +47,7 @@ import { buildRoutineMarkdown } from '@/app/lib/markdown';
 import ExportMarkdownDialog from '@/app/components/ExportMarkdownDialog.vue';
 
 const router = useRouter();
+const route = useRoute();
 const {
   routines,
   createRoutine,
@@ -134,21 +136,45 @@ function openEditor(id: string): void {
   router.push({ name: 'routine', params: { id } });
 }
 
+const shareDialogOpen = ref(false);
+const shareUrl = ref('');
+
 async function onShare(id: string): Promise<void> {
+  let url: string;
   try {
-    const code = await exportRoutineCode(id);
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(code);
-      toast.success('Código copiado para a área de transferência');
-    } else {
-      importCodeInput.value = code;
-      importDialogOpen.value = true;
-      toast.info('Copie o código abaixo manualmente');
-    }
+    url = await buildShareUrl(id);
   } catch (err) {
     console.error(err);
-    toast.error('Erro ao gerar código');
+    toast.error('Erro ao gerar link');
+    return;
   }
+
+  // 1. Share sheet nativo (WhatsApp, Telegram, etc.).
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'GymDaily — treino', url });
+      return;
+    } catch (err) {
+      // Usuário cancelou o menu: não é erro, e não vale cair pro clipboard.
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      // Outras falhas: cai pro clipboard abaixo.
+    }
+  }
+
+  // 2. Copiar o link no clipboard.
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copiado para a área de transferência');
+      return;
+    } catch {
+      // cai pro diálogo abaixo.
+    }
+  }
+
+  // 3. Fallback final: mostrar o link num diálogo pra copiar manualmente.
+  shareUrl.value = url;
+  shareDialogOpen.value = true;
 }
 
 const exportDialogOpen = ref(false);
@@ -213,6 +239,23 @@ async function confirmImport(): Promise<void> {
     toast.error('Erro ao importar');
   }
 }
+
+// Treino compartilhado via URL (?import=...): abre o diálogo de import já
+// preenchido e remove o param pra não re-importar em reload.
+onMounted(() => {
+  const raw = route.query.import;
+  const param = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof param !== 'string' || !param) return;
+
+  importError.value = null;
+  importPreview.value = null;
+  importCodeInput.value = extractShareCode(param);
+  parseImport();
+  if (importError.value) toast.error('Link inválido');
+  importDialogOpen.value = true;
+
+  void router.replace({ query: {} });
+});
 </script>
 
 <template>
@@ -389,6 +432,13 @@ async function confirmImport(): Promise<void> {
       v-model:open="exportDialogOpen"
       :markdown="exportMarkdown"
       title="Exportar treino"
+    />
+
+    <ExportMarkdownDialog
+      v-model:open="shareDialogOpen"
+      :markdown="shareUrl"
+      title="Compartilhar treino"
+      description="Copie o link e envie pra quem quiser. Já tentamos copiar pra você."
     />
 
     <Dialog v-model:open="dialogOpen">

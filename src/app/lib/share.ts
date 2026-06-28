@@ -52,6 +52,25 @@ export async function exportRoutineCode(routineId: string): Promise<string> {
   return PREFIX + utf8ToBase64(JSON.stringify(data));
 }
 
+/** Monta a URL de compartilhamento a partir de um origin e um código já gerado. */
+export function buildShareUrlFromCode(origin: string, code: string): string {
+  return `${origin}/?import=${encodeURIComponent(code)}`;
+}
+
+/** Gera o código do treino e devolve a URL de compartilhamento completa. */
+export async function buildShareUrl(routineId: string): Promise<string> {
+  const code = await exportRoutineCode(routineId);
+  return buildShareUrlFromCode(window.location.origin, code);
+}
+
+/**
+ * Normaliza o valor do query param `import` (já decodificado pelo router/URL)
+ * num código pronto pra `decodeRoutineCode`.
+ */
+export function extractShareCode(rawImportParam: string): string {
+  return rawImportParam.trim();
+}
+
 export interface ImportPreview {
   name: string;
   exerciseCount: number;
