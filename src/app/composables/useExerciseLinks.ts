@@ -13,7 +13,7 @@ async function load(): Promise<void> {
 }
 
 export function useExerciseLinks() {
-  void load();
+  void load().catch((e) => console.error('[useExerciseLinks] load failed', e));
 
   async function link(name: string, datasetId: string): Promise<void> {
     const normName = normalize(name);

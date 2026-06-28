@@ -18,8 +18,8 @@ test('toSlim monta entrada PT com paths reescritos', () => {
     alvo: 'abdômen',
     musculo: 'abdômen',
     passos: ['Deite.', 'Suba.'],
-    image: 'exercises/images/0001-x.jpg',
-    gif: 'exercises/videos/0001-x.gif',
+    image: '/exercises/images/0001-x.jpg',
+    gif: '/exercises/videos/0001-x.gif',
   });
 });
 

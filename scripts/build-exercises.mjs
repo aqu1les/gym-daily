@@ -13,8 +13,8 @@ export function toSlim(raw, translations) {
     alvo: translateMuscle(raw.target),
     musculo: translateMuscle(raw.muscle_group),
     passos: tr.passos ?? raw.instruction_steps?.en ?? [],
-    image: `exercises/${raw.image}`,
-    gif: `exercises/${raw.gif_url}`,
+    image: `/exercises/${raw.image}`,
+    gif: `/exercises/${raw.gif_url}`,
   };
 }
 

@@ -4,12 +4,14 @@ import { ALIASES } from '@/app/data/exercise-aliases';
 export function normalize(name: string): string {
   return name
     .normalize('NFD')
+    // strip U+0300–U+036F combining diacritics
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
 
+/** Callers should pass normalized strings (via `normalize()`) for consistent results. */
 export function diceCoefficient(a: string, b: string): number {
   const ta = new Set(a.split(' ').filter(Boolean));
   const tb = new Set(b.split(' ').filter(Boolean));

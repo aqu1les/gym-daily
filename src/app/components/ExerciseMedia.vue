@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { resolveExerciseMedia } from '@/app/lib/exerciseMedia';
 import { useExerciseLinks } from '@/app/composables/useExerciseLinks';
-import { Dialog, DialogContent } from '@/app/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/app/components/ui/dialog';
 import type { SlimExercise } from '@/app/data/exercise-catalog';
 
 const props = defineProps<{ names: string[] }>();
@@ -18,12 +18,11 @@ const slides = computed<Slide[]>(() =>
   })),
 );
 
-const hasAny = computed(() => slides.value.some((s) => s.ex));
-const fullscreenGif = ref<string | null>(null);
+const fullscreenEx = ref<SlimExercise | null>(null);
 </script>
 
 <template>
-  <div v-if="hasAny" class="mb-3">
+  <div v-if="slides.length" class="mb-3">
     <div class="flex gap-2 overflow-x-auto snap-x snap-mandatory rounded-lg">
       <div
         v-for="slide in slides"
@@ -34,7 +33,7 @@ const fullscreenGif = ref<string | null>(null);
           v-if="slide.ex"
           type="button"
           class="block w-full"
-          @click="fullscreenGif = slide.ex.gif"
+          @click="fullscreenEx = slide.ex"
         >
           <img
             :src="slide.ex.gif"
@@ -54,12 +53,21 @@ const fullscreenGif = ref<string | null>(null);
         >
           Vincular GIF de "{{ slide.name }}"
         </button>
+        <button
+          v-if="slide.ex"
+          type="button"
+          class="mt-1 block w-full text-xs text-muted-foreground underline text-center"
+          @click.stop="emit('request-link', slide.name)"
+        >
+          trocar GIF
+        </button>
       </div>
     </div>
 
-    <Dialog :open="!!fullscreenGif" @update:open="(o: boolean) => { if (!o) fullscreenGif = null }">
+    <Dialog :open="!!fullscreenEx" @update:open="(o: boolean) => { if (!o) fullscreenEx = null }">
       <DialogContent class="max-w-lg p-2">
-        <img v-if="fullscreenGif" :src="fullscreenGif" class="w-full rounded-lg" />
+        <DialogTitle class="sr-only">{{ fullscreenEx?.nome }}</DialogTitle>
+        <img v-if="fullscreenEx" :src="fullscreenEx.gif" :alt="fullscreenEx.nome" class="w-full rounded-lg" />
       </DialogContent>
     </Dialog>
   </div>

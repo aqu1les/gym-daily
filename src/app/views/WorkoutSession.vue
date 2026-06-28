@@ -63,6 +63,7 @@ function onRequestLink(name: string): void {
 const mediaNames = computed<string[]>(() => {
   const ex = currentExercise.value;
   if (!ex) return [];
+  if (ex.id in session.substitutions) return [currentDisplayName.value];
   return ex.isCombo && ex.comboName ? [ex.name, ex.comboName] : [ex.name];
 });
 
