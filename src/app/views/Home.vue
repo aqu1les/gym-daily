@@ -10,6 +10,7 @@ import {
   X,
   Share2,
   ClipboardPaste,
+  FileText,
 } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
@@ -41,6 +42,8 @@ import {
   importRoutineFromPreview,
   type ImportPreview,
 } from '@/app/lib/share';
+import { buildRoutineMarkdown } from '@/app/lib/markdown';
+import ExportMarkdownDialog from '@/app/components/ExportMarkdownDialog.vue';
 
 const router = useRouter();
 const {
@@ -145,6 +148,19 @@ async function onShare(id: string): Promise<void> {
   } catch (err) {
     console.error(err);
     toast.error('Erro ao gerar código');
+  }
+}
+
+const exportDialogOpen = ref(false);
+const exportMarkdown = ref('');
+
+async function onExportMarkdown(id: string): Promise<void> {
+  try {
+    exportMarkdown.value = await buildRoutineMarkdown(id);
+    exportDialogOpen.value = true;
+  } catch (err) {
+    console.error(err);
+    toast.error('Erro ao exportar');
   }
 }
 
@@ -310,6 +326,10 @@ async function confirmImport(): Promise<void> {
               <Share2 class="size-4" />
               Compartilhar
             </DropdownMenuItem>
+            <DropdownMenuItem @select="onExportMarkdown(routine.id)">
+              <FileText class="size-4" />
+              Exportar (markdown)
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="text-destructive" @select="onDelete(routine.id, routine.name)">
               Excluir
@@ -364,6 +384,12 @@ async function confirmImport(): Promise<void> {
         </div>
       </DialogContent>
     </Dialog>
+
+    <ExportMarkdownDialog
+      v-model:open="exportDialogOpen"
+      :markdown="exportMarkdown"
+      title="Exportar treino"
+    />
 
     <Dialog v-model:open="dialogOpen">
       <DialogContent>

@@ -4,13 +4,22 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useWakeLock } from '@vueuse/core';
 import { useWebHaptics } from 'web-haptics/vue';
-import { ChevronLeft, ChevronRight, Check, X, Repeat } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, Check, X, Repeat, MoreVertical, FileText } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/app/components/ui/dropdown-menu';
 import RestTimer from '@/app/components/RestTimer.vue';
 import AlternativesSheet from '@/app/components/AlternativesSheet.vue';
+import ExportMarkdownDialog from '@/app/components/ExportMarkdownDialog.vue';
 import { useActiveSession } from '@/app/stores/activeSession';
 import { useRestTimer } from '@/app/composables/useRestTimer';
+import { formatSessionMarkdown, formatExerciseMarkdown } from '@/app/lib/markdown';
+import { db } from '@/app/db/schema';
 import { toast } from 'vue-sonner';
 
 const props = defineProps<{ routineId: string }>();
@@ -42,6 +51,45 @@ const { isSupported: wakeLockSupported, request: requestWakeLock, release: relea
   useWakeLock();
 
 const altSheetOpen = ref(false);
+
+const exportDialogOpen = ref(false);
+const exportMarkdown = ref('');
+const exportTitle = ref('Exportar');
+
+async function routineName(): Promise<string> {
+  const r = await db.routines.get(props.routineId);
+  return r?.name ?? 'Treino';
+}
+
+async function onExportSession(): Promise<void> {
+  try {
+    const name = await routineName();
+    exportMarkdown.value = formatSessionMarkdown(
+      name,
+      exercises.value,
+      session.entries,
+      session.substitutions,
+    );
+    exportTitle.value = 'Exportar sessão';
+    exportDialogOpen.value = true;
+  } catch (err) {
+    console.error(err);
+    toast.error('Erro ao exportar');
+  }
+}
+
+function onExportCurrentExercise(): void {
+  const ex = currentExercise.value;
+  if (!ex) return;
+  exportMarkdown.value = formatExerciseMarkdown(
+    ex,
+    currentEntries.value,
+    currentDisplayName.value,
+    currentIndex.value + 1,
+  );
+  exportTitle.value = 'Exportar exercício';
+  exportDialogOpen.value = true;
+}
 
 onMounted(async () => {
   const needsStart =
@@ -158,6 +206,23 @@ function onAbort(): void {
           <div class="h-full bg-primary transition-all" :style="{ width: `${progressPct}%` }" />
         </div>
       </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button size="icon-sm" variant="ghost" aria-label="Mais ações">
+            <MoreVertical class="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem @select="onExportSession">
+            <FileText class="size-4" />
+            Exportar sessão
+          </DropdownMenuItem>
+          <DropdownMenuItem :disabled="!currentExercise" @select="onExportCurrentExercise">
+            <FileText class="size-4" />
+            Exportar exercício atual
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button size="sm" variant="secondary" @click="onFinish">
         <Check class="size-4" />
         Finalizar
@@ -274,6 +339,12 @@ function onAbort(): void {
       :alternatives="currentExercise.alternatives"
       @pick="pickAlternative"
       @reset="resetSubstitution"
+    />
+
+    <ExportMarkdownDialog
+      v-model:open="exportDialogOpen"
+      :markdown="exportMarkdown"
+      :title="exportTitle"
     />
   </div>
 </template>
