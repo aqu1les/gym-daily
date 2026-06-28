@@ -1,16 +1,12 @@
-import { db, type SetEntry, type WorkoutSession } from '@/app/db/schema';
+import { db, type WorkoutSession } from '@/app/db/schema';
 import { useLiveQuery, runWithToast } from '@/app/db/live';
+import { buildLastByKey, keyOf, type LastWeights } from '@/app/lib/markdown';
 import type { Ref } from 'vue';
-
-export interface LastSetWeights {
-  weightKg: number;
-  weightKgSecondary?: number;
-}
 
 export interface UseHistory {
   sessions: Ref<WorkoutSession[]>;
   deleteSession: (id: string) => Promise<void>;
-  lastSetFor: (exerciseId: string, setNumber: number) => Promise<LastSetWeights | undefined>;
+  lastSetFor: (exerciseId: string, setNumber: number) => Promise<LastWeights | undefined>;
 }
 
 export function useHistory(): UseHistory {
@@ -26,25 +22,14 @@ export function useHistory(): UseHistory {
   async function lastSetFor(
     exerciseId: string,
     setNumber: number,
-  ): Promise<LastSetWeights | undefined> {
+  ): Promise<LastWeights | undefined> {
     const recent = await db.sessions
       .orderBy('startedAt')
       .reverse()
       .filter((s) => s.finishedAt !== undefined)
       .limit(20)
       .toArray();
-    for (const session of recent) {
-      const match = session.entries.find(
-        (e: SetEntry) => e.exerciseId === exerciseId && e.setNumber === setNumber && e.done,
-      );
-      if (match) {
-        return {
-          weightKg: match.weightKg,
-          weightKgSecondary: match.weightKgSecondary,
-        };
-      }
-    }
-    return undefined;
+    return buildLastByKey(recent).get(keyOf(exerciseId, setNumber));
   }
 
   return { sessions, deleteSession, lastSetFor };
