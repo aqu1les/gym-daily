@@ -16,6 +16,8 @@ import {
 import RestTimer from '@/app/components/RestTimer.vue';
 import AlternativesSheet from '@/app/components/AlternativesSheet.vue';
 import ExportMarkdownDialog from '@/app/components/ExportMarkdownDialog.vue';
+import ExerciseMedia from '@/app/components/ExerciseMedia.vue';
+import ExerciseLinkSheet from '@/app/components/ExerciseLinkSheet.vue';
 import { useActiveSession } from '@/app/stores/activeSession';
 import { useRestTimer } from '@/app/composables/useRestTimer';
 import { formatSessionMarkdown, formatExerciseMarkdown } from '@/app/lib/markdown';
@@ -51,6 +53,18 @@ const { isSupported: wakeLockSupported, request: requestWakeLock, release: relea
   useWakeLock();
 
 const altSheetOpen = ref(false);
+
+const linkSheetOpen = ref(false);
+const linkSheetName = ref('');
+function onRequestLink(name: string): void {
+  linkSheetName.value = name;
+  linkSheetOpen.value = true;
+}
+const mediaNames = computed<string[]>(() => {
+  const ex = currentExercise.value;
+  if (!ex) return [];
+  return ex.isCombo && ex.comboName ? [ex.name, ex.comboName] : [ex.name];
+});
 
 const exportDialogOpen = ref(false);
 const exportMarkdown = ref('');
@@ -255,6 +269,7 @@ function onAbort(): void {
           Trocar
         </Button>
       </div>
+      <ExerciseMedia :names="mediaNames" class="mt-3" @request-link="onRequestLink" />
     </section>
 
     <section v-if="currentExercise" class="space-y-2 flex-1">
@@ -346,5 +361,7 @@ function onAbort(): void {
       :markdown="exportMarkdown"
       :title="exportTitle"
     />
+
+    <ExerciseLinkSheet v-model:open="linkSheetOpen" :name="linkSheetName" />
   </div>
 </template>
