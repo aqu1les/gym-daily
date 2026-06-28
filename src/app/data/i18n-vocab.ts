@@ -1,0 +1,82 @@
+const CATEGORY: Record<string, string> = {
+  'waist': 'abdômen',
+  'upper legs': 'pernas (superior)',
+  'back': 'costas',
+  'lower legs': 'panturrilhas',
+  'chest': 'peito',
+  'upper arms': 'braços (superior)',
+  'cardio': 'cardio',
+  'shoulders': 'ombros',
+  'lower arms': 'antebraços',
+  'neck': 'pescoço',
+};
+
+const EQUIPMENT: Record<string, string> = {
+  'assisted': 'assistido',
+  'band': 'faixa elástica',
+  'barbell': 'barra',
+  'body weight': 'peso corporal',
+  'bosu ball': 'bola bosu',
+  'cable': 'cabo/polia',
+  'dumbbell': 'halteres',
+  'elliptical machine': 'elíptico',
+  'ez barbell': 'barra W',
+  'hammer': 'martelo',
+  'kettlebell': 'kettlebell',
+  'leverage machine': 'máquina',
+  'medicine ball': 'medicine ball',
+  'olympic barbell': 'barra olímpica',
+  'resistance band': 'faixa de resistência',
+  'roller': 'rolo',
+  'rope': 'corda',
+  'skierg machine': 'ski erg',
+  'sled machine': 'leg press/sled',
+  'smith machine': 'smith',
+  'stability ball': 'bola suíça',
+  'stationary bike': 'bicicleta ergométrica',
+  'stepmill machine': 'escada/stepmill',
+  'tire': 'pneu',
+  'trap bar': 'barra hexagonal',
+  'upper body ergometer': 'ergômetro de braços',
+  'weighted': 'com peso',
+  'wheel roller': 'roda abdominal',
+};
+
+const MUSCLE: Record<string, string> = {
+  'hip flexors': 'flexores do quadril',
+  'obliques': 'oblíquos',
+  'hamstrings': 'posteriores de coxa',
+  'biceps': 'bíceps',
+  'ankle stabilizers': 'estabilizadores do tornozelo',
+  'triceps': 'tríceps',
+  'shoulders': 'ombros',
+  'glutes': 'glúteos',
+  'quadriceps': 'quadríceps',
+  'chest': 'peito',
+  'calves': 'panturrilhas',
+  'forearms': 'antebraços',
+  'lower back': 'lombar',
+  'traps': 'trapézio',
+  'upper back': 'costas (superior)',
+  'ankles': 'tornozelos',
+  'trapezius': 'trapézio',
+  'deltoids': 'deltoides',
+  'core': 'core',
+  'rhomboids': 'romboides',
+  'lats': 'dorsais',
+  'abs': 'abdômen',
+  'abductors': 'abdutores',
+  'adductors': 'adutores',
+  'serratus anterior': 'serrátil anterior',
+  'spine': 'coluna',
+  'pectorals': 'peitorais',
+  'levator scapulae': 'levantador da escápula',
+};
+
+function lookup(table: Record<string, string>, en: string): string {
+  return table[en.toLowerCase().trim()] ?? en;
+}
+
+export const translateCategory = (en: string) => lookup(CATEGORY, en);
+export const translateEquipment = (en: string) => lookup(EQUIPMENT, en);
+export const translateMuscle = (en: string) => lookup(MUSCLE, en);
