@@ -71,6 +71,17 @@ const MUSCLE: Record<string, string> = {
   'spine': 'coluna',
   'pectorals': 'peitorais',
   'levator scapulae': 'levantador da escápula',
+  'quads': 'quadríceps',
+  'delts': 'deltoides',
+  'latissimus dorsi': 'dorsais',
+  'abdominals': 'abdômen',
+  'soleus': 'sóleo',
+  'rotator cuff': 'manguito rotador',
+  'wrist flexors': 'flexores do punho',
+  'wrist extensors': 'extensores do punho',
+  'wrists': 'punhos',
+  'hands': 'mãos',
+  'cardiovascular system': 'sistema cardiovascular',
 };
 
 function lookup(table: Record<string, string>, en: string): string {
