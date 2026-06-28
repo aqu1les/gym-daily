@@ -1,0 +1,9 @@
+---
+// SPA fallback: vue-router uses history mode, so deep links like /settings hit
+// the server. Production rewrites via public/_redirects (Cloudflare), but
+// `astro dev` and hosts that serve 404.html need this shell to boot the SPA,
+// which then client-side routes to the requested path.
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout />
