@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { watch } from 'vue';
-import { Copy } from 'lucide-vue-next';
+import { ref, watch, onBeforeUnmount, useTemplateRef } from 'vue';
+import { Copy, Check } from 'lucide-vue-next';
 import {
   Dialog,
   DialogScrollContent,
@@ -10,7 +10,6 @@ import {
   DialogFooter,
 } from '@/app/components/ui/dialog';
 import { Button } from '@/app/components/ui/button';
-import { toast } from 'vue-sonner';
 
 const props = withDefaults(
   defineProps<{
@@ -21,32 +20,48 @@ const props = withDefaults(
   }>(),
   {
     title: 'Exportar markdown',
-    description: 'Copie e cole numa plataforma de LLM. Já tentamos copiar pra você.',
+    description: 'Copie e cole numa plataforma de LLM.',
   },
 );
 
 const emit = defineEmits<{ 'update:open': [boolean] }>();
 
+const copied = ref(false);
+const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
+let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+function selectAll(): void {
+  textarea.value?.focus();
+  textarea.value?.select();
+}
+
 async function copy(): Promise<void> {
+  if (!navigator.clipboard?.writeText) {
+    selectAll(); // sem clipboard: seleciona para copiar manualmente
+    return;
+  }
   try {
-    if (!navigator.clipboard?.writeText) {
-      toast.info('Copie o texto manualmente');
-      return;
-    }
     await navigator.clipboard.writeText(props.markdown);
-    toast.success('Markdown copiado');
+    copied.value = true;
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => emit('update:open', false), 900);
   } catch {
-    toast.info('Copie o texto manualmente');
+    selectAll();
   }
 }
 
-// Tenta copiar automaticamente ao abrir (dentro do gesto que abriu o dialog).
+// Reseta o feedback sempre que o dialog reabre.
 watch(
   () => props.open,
   (isOpen) => {
-    if (isOpen && props.markdown) void copy();
+    if (isOpen) {
+      copied.value = false;
+      clearTimeout(closeTimer);
+    }
   },
 );
+
+onBeforeUnmount(() => clearTimeout(closeTimer));
 </script>
 
 <template>
@@ -57,6 +72,7 @@ watch(
         <DialogDescription>{{ description }}</DialogDescription>
       </DialogHeader>
       <textarea
+        ref="textarea"
         :value="markdown"
         readonly
         rows="14"
@@ -68,9 +84,10 @@ watch(
         <Button type="button" variant="ghost" @click="emit('update:open', false)">
           Fechar
         </Button>
-        <Button type="button" @click="copy">
-          <Copy class="size-4" />
-          Copiar
+        <Button type="button" :disabled="copied" @click="copy">
+          <Check v-if="copied" class="size-4" />
+          <Copy v-else class="size-4" />
+          {{ copied ? 'Copiado!' : 'Copiar' }}
         </Button>
       </DialogFooter>
     </DialogScrollContent>
