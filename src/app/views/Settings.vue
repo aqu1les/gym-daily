@@ -1,14 +1,33 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue';
-import { Download, Upload } from 'lucide-vue-next';
+import { Download, Upload, FileText } from 'lucide-vue-next';
 import { Button } from '@/app/components/ui/button';
 import { downloadBackup, importDatabase } from '@/app/db/backup';
+import { buildAllRoutinesMarkdown } from '@/app/lib/markdown';
+import ExportMarkdownDialog from '@/app/components/ExportMarkdownDialog.vue';
 import { useActiveSession } from '@/app/stores/activeSession';
 import { toast } from 'vue-sonner';
 
 const session = useActiveSession();
 const fileInput = useTemplateRef<HTMLInputElement>('fileInput');
 const busy = ref(false);
+
+const exportDialogOpen = ref(false);
+const exportMarkdown = ref('');
+
+async function onExportMarkdown(): Promise<void> {
+  if (busy.value) return;
+  busy.value = true;
+  try {
+    exportMarkdown.value = await buildAllRoutinesMarkdown();
+    exportDialogOpen.value = true;
+  } catch (err) {
+    console.error(err);
+    toast.error(err instanceof Error ? err.message : 'Erro ao exportar');
+  } finally {
+    busy.value = false;
+  }
+}
 
 async function onExport(): Promise<void> {
   if (busy.value) return;
@@ -75,6 +94,19 @@ async function onImport(event: Event): Promise<void> {
 
     <section class="rounded-lg border border-border bg-card p-4 mt-4 space-y-3">
       <div>
+        <h2 class="font-medium">Exportar para LLM</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">
+          Gera todos os treinos em markdown para colar numa plataforma de IA.
+        </p>
+      </div>
+      <Button class="w-full" variant="secondary" :disabled="busy" @click="onExportMarkdown">
+        <FileText class="size-4" />
+        Exportar treinos (markdown)
+      </Button>
+    </section>
+
+    <section class="rounded-lg border border-border bg-card p-4 mt-4 space-y-3">
+      <div>
         <h2 class="font-medium">Restaurar</h2>
         <p class="text-xs text-muted-foreground mt-0.5">
           Importa um arquivo de backup. <strong class="text-destructive">Sobrescreve</strong> todos os dados atuais.
@@ -92,5 +124,12 @@ async function onImport(event: Event): Promise<void> {
         @change="onImport"
       />
     </section>
+
+    <ExportMarkdownDialog
+      v-model:open="exportDialogOpen"
+      :markdown="exportMarkdown"
+      title="Exportar treinos"
+      description="Todos os treinos em markdown. Copie e cole numa plataforma de IA."
+    />
   </div>
 </template>

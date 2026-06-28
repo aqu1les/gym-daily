@@ -160,9 +160,19 @@ export function formatSessionMarkdown(
   return blocks.join('\n').trimEnd() + '\n';
 }
 
+/** Último peso por série a partir das ~20 sessões finalizadas mais recentes. */
+async function recentLastByKey(): Promise<LastByKey> {
+  const recent = await db.sessions
+    .orderBy('startedAt')
+    .reverse()
+    .filter((s) => s.finishedAt !== undefined)
+    .limit(20)
+    .toArray();
+  return buildLastByKey(recent);
+}
+
 /**
- * Carrega a rotina, seus exercícios e o último peso registrado por série
- * (varrendo as ~20 sessões finalizadas mais recentes, igual ao useHistory),
+ * Carrega a rotina, seus exercícios e o último peso registrado por série,
  * e formata como markdown (Estilo 1).
  */
 export async function buildRoutineMarkdown(routineId: string): Promise<string> {
@@ -174,12 +184,25 @@ export async function buildRoutineMarkdown(routineId: string): Promise<string> {
     .equals(routineId)
     .sortBy('order');
 
-  const recent = await db.sessions
-    .orderBy('startedAt')
-    .reverse()
-    .filter((s) => s.finishedAt !== undefined)
-    .limit(20)
-    .toArray();
+  return formatRoutineMarkdown(routine.name, exercises, await recentLastByKey());
+}
 
-  return formatRoutineMarkdown(routine.name, exercises, buildLastByKey(recent));
+/**
+ * Concatena todas as rotinas (na ordem da Home) num único markdown,
+ * separadas por `---`. O histórico é varrido uma vez só.
+ */
+export async function buildAllRoutinesMarkdown(): Promise<string> {
+  const routines = await db.routines.orderBy('order').toArray();
+  if (routines.length === 0) throw new Error('Nenhum treino para exportar');
+
+  const lastByKey = await recentLastByKey();
+  const blocks: string[] = [];
+  for (const routine of routines) {
+    const exercises = await db.exercises
+      .where('routineId')
+      .equals(routine.id)
+      .sortBy('order');
+    blocks.push(formatRoutineMarkdown(routine.name, exercises, lastByKey).trimEnd());
+  }
+  return blocks.join('\n\n---\n\n') + '\n';
 }

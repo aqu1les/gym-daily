@@ -17,8 +17,12 @@ const props = withDefaults(
     open: boolean;
     markdown: string;
     title?: string;
+    description?: string;
   }>(),
-  { title: 'Exportar markdown' },
+  {
+    title: 'Exportar markdown',
+    description: 'Copie e cole numa plataforma de LLM. Já tentamos copiar pra você.',
+  },
 );
 
 const emit = defineEmits<{ 'update:open': [boolean] }>();
@@ -50,9 +54,7 @@ watch(
     <DialogScrollContent>
       <DialogHeader>
         <DialogTitle>{{ title }}</DialogTitle>
-        <DialogDescription>
-          Copie e cole numa plataforma de LLM. Já tentamos copiar pra você.
-        </DialogDescription>
+        <DialogDescription>{{ description }}</DialogDescription>
       </DialogHeader>
       <textarea
         :value="markdown"
