@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # superpowers brainstorming specs / design docs — local only
 docs/superpowers/
+
+# build input do catálogo de exercícios (regenerável a partir do dataset)
+scripts/data/exercises.raw.json
