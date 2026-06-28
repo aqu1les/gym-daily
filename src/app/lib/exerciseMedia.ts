@@ -1,4 +1,5 @@
 import { catalogById, type SlimExercise } from '@/app/data/exercise-catalog';
+import { ALIASES } from '@/app/data/exercise-aliases';
 
 export function normalize(name: string): string {
   return name
@@ -20,4 +21,30 @@ export function diceCoefficient(a: string, b: string): number {
 
 export function byId(id: string): SlimExercise | null {
   return catalogById.get(id) ?? null;
+}
+
+const FUZZY_THRESHOLD = 0.5;
+
+export function resolveExerciseMedia(
+  name: string,
+  links: Map<string, string>,
+): SlimExercise | null {
+  const key = normalize(name);
+
+  const linked = links.get(key);
+  if (linked) return byId(linked);
+
+  const alias = ALIASES[key];
+  if (alias) return byId(alias);
+
+  let bestId: string | null = null;
+  let bestScore = 0;
+  for (const aliasKey of Object.keys(ALIASES)) {
+    const score = diceCoefficient(key, aliasKey);
+    if (score > bestScore) {
+      bestScore = score;
+      bestId = ALIASES[aliasKey];
+    }
+  }
+  return bestScore >= FUZZY_THRESHOLD && bestId ? byId(bestId) : null;
 }

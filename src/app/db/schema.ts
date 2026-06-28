@@ -38,10 +38,17 @@ export interface WorkoutSession {
   entries: SetEntry[];
 }
 
+export interface ExerciseLink {
+  normName: string;
+  datasetId: string;
+  linkedAt: number;
+}
+
 export class GymDailyDB extends Dexie {
   routines!: EntityTable<Routine, 'id'>;
   exercises!: EntityTable<Exercise, 'id'>;
   sessions!: EntityTable<WorkoutSession, 'id'>;
+  exerciseLinks!: EntityTable<ExerciseLink, 'normName'>;
 
   constructor() {
     super('gymdaily');
@@ -49,6 +56,12 @@ export class GymDailyDB extends Dexie {
       routines: 'id, order, createdAt',
       exercises: 'id, routineId, order',
       sessions: 'id, routineId, startedAt, [routineId+startedAt]',
+    });
+    this.version(2).stores({
+      routines: 'id, order, createdAt',
+      exercises: 'id, routineId, order',
+      sessions: 'id, routineId, startedAt, [routineId+startedAt]',
+      exerciseLinks: 'normName, datasetId',
     });
   }
 }
