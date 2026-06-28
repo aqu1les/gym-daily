@@ -40,6 +40,33 @@ v7 replaced the Go compiler with a Rust one. It is **strict about HTML** — thi
 
 `compressHTML` now defaults to `'jsx'` (was `true`): inter-element whitespace is stripped with JSX rules. Irrelevant for this SPA (the body is just a Vue mount point), but if static markup ever loses spacing between inline elements, set `compressHTML: true` in `astro.config.mjs` or add `{" "}`.
 
+## PWA: virtual modules are REQUIRED (gotcha)
+
+`@vite-pwa/astro` does **not** auto-inject anything in Astro (unlike its React/Vue framework variants). The build emits `manifest.webmanifest`, `sw.js`, `registerSW.js` — but they only get wired into the page if [index.astro](../../../src/pages/index.astro) imports the virtual modules explicitly:
+
+```astro
+---
+import { pwaInfo } from 'virtual:pwa-info';
+---
+<head>
+  {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}  {/* <link rel="manifest"> */}
+</head>
+<body>
+  <script>
+    import { registerSW } from 'virtual:pwa-register';
+    registerSW({ immediate: true });  // immediate pairs with registerType: 'autoUpdate'
+  </script>
+</body>
+```
+
+Virtual-module types live in [src/env.d.ts](../../../src/env.d.ts) (`vite-plugin-pwa/info` + `/client`) — needed for `astro check`.
+
+**Verify a PWA change** by building and grepping the output, not by reading dev (the SW doesn't register in dev by default):
+```
+bun run build && grep 'rel="manifest"' dist/index.html
+```
+The SW registration is bundled into a `dist/_astro/index.astro_...js` module, loaded via `<script type="module">`.
+
 ## Vite 8 / Rolldown
 
 v7 bundles with **Vite 8**, whose bundler is **Rolldown** (Rust). All Vite plugins here support it (`@tailwindcss/vite`, `vite-plugin-pwa`).
