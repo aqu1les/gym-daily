@@ -131,14 +131,5 @@ async function onImport(event: Event): Promise<void> {
       title="Exportar treinos"
       description="Todos os treinos em markdown. Copie e cole numa plataforma de IA."
     />
-
-    <footer class="mt-6 pb-4">
-      <p class="text-xs text-muted-foreground">
-        GIFs e imagens de exercícios:
-        <a href="https://github.com/hasaneyldrm/exercises-dataset" target="_blank" rel="noopener noreferrer"
-           class="underline">hasaneyldrm/exercises-dataset</a>
-        — uso não-comercial.
-      </p>
-    </footer>
   </div>
 </template>
